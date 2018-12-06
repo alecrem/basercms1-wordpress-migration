@@ -45,11 +45,18 @@ class CsvParser {
   csvRows = [];
 
   constructPageQuery = (row) => {
+    let date;
+    if (row.publish_begin) {
+      date = new Date(row.publish_begin);
+    } else {
+      date = new Date(row.created);
+    }
+    console.log('pageQuery.date', date);
     return new PageQuery({
       title: row.title,
       slug: row.name,
       content: row.contents,
-      date: new Date(row.publish_begin).toISOString(),
+      date: date,
       status: 'publish',
       comment_status: 'closed',
       ping_status: 'closed',
@@ -58,7 +65,9 @@ class CsvParser {
 
   insertPage = (pageQuery) => {
     wp.pages().create(pageQuery).then(function(response) {
-      console.log('Insert ID', response.id);
+      console.log('Page inserted with ID', response.id);
+    }).catch(error => {
+      console.error('Error posting page!', error);
     });
   }
 
@@ -72,6 +81,7 @@ class CsvParser {
       this.csvRows.push(csvrow);
     })
     .on('end', () => {
+      console.log('Processing ' + this.csvRows.length + ' rows (including header if present)')
       let promises = [];
       this.csvRows.forEach(csvrow => {
         var i = 0;
