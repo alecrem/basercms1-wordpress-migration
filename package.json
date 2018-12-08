@@ -1,0 +1,23 @@
+{
+  "name": "basercms1-wordpress-migration",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run pages",
+    "pages": "tsc -lib 'es6' pages.ts && node pages.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:alecrem/basercms1-wordpress-migration.git"
+  },
+  "author": "Alejandro Cremades",
+  "license": "MIT",
+  "homepage": "https://github.com/alecrem/basercms1-wordpress-migration",
+  "dependencies": {
+    "@types/node": "^10.12.12",
+    "csv": "^5.0.0",
+    "wpapi": "^1.1.2"
+  }
+}
