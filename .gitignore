@@ -1,6 +1,7 @@
 *.js
 settings.ts
 data/pages.csv
+data/posts.csv
 
 # Logs
 logs

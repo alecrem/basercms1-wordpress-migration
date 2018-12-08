@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run pages",
+    "start": "npm run pages; npm run posts",
     "pages": "tsc -lib 'es6' pages.ts && node pages.js",
+    "posts": "tsc -lib 'es6' posts.ts && node posts.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
