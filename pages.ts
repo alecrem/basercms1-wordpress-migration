@@ -3,6 +3,8 @@ const parse = require('csv-parse');
 const WPAPI = require('wpapi');
 import Settings from "./settings"
 
+const inputFile = 'data/pages.csv';
+
 class ParsedCsvPageRow {
   id: string = null;
   sort: string = null;
@@ -41,7 +43,6 @@ class PageQuery {
   }
 }
 class CsvParser {
-  inputFile = 'data/pages.csv';
   csvRows = [];
 
   constructPageQuery = (row) => {
@@ -51,7 +52,6 @@ class CsvParser {
     } else {
       date = new Date(row.created);
     }
-    console.log('pageQuery.date', date);
     return new PageQuery({
       title: row.title,
       slug: row.name,
@@ -72,7 +72,7 @@ class CsvParser {
   }
 
   parse = () => {
-    fs.createReadStream(this.inputFile)
+    fs.createReadStream(inputFile)
     .pipe(parse({
       delimiter: config.csv_delimiter,
       escape: config.csv_escape,
@@ -82,7 +82,6 @@ class CsvParser {
     })
     .on('end', () => {
       console.log('Processing ' + this.csvRows.length + ' rows (including header if present)')
-      let promises = [];
       this.csvRows.forEach(csvrow => {
         var i = 0;
         let rowObject = new ParsedCsvPageRow({});
