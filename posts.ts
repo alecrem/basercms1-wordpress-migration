@@ -13,6 +13,7 @@ class ParsedCsvPostRow {
   content: string = null;
   detail: string = null;
   blog_category_id: string = null;
+  categories: number[] = [];
   user_id: string = null;
   status: string = null;
   posts_date: string = null;
@@ -37,12 +38,14 @@ class PostQuery {
   author: number = null;
   comment_status: string = null;
   ping_status: string = null;
+  categories: number[] = [];
 
   constructor(values: Object) {
     Object.assign(this, values);
   }
 }
 class CsvParser {
+  settings: Settings = new Settings();
   csvRows = [];
   queries: PostQuery[] = [];
 
@@ -53,11 +56,11 @@ class CsvParser {
     } else {
       date = new Date(row.created);
     }
-    // console.log('PostQuery.date', date);
     return new PostQuery({
       title: row.name,
       slug: row.no,
       content: row.content,
+      categories: row.categories,
       date: date,
       status: 'publish',
       comment_status: 'closed',
@@ -76,8 +79,8 @@ class CsvParser {
   parse = () => {
     fs.createReadStream(inputFile)
     .pipe(parse({
-      delimiter: config.csv_delimiter,
-      escape: config.csv_escape,
+      delimiter: this.settings.csv_delimiter,
+      escape: this.settings.csv_escape,
     }))
     .on('data', (csvrow) => {
       this.csvRows.push(csvrow);
@@ -105,6 +108,14 @@ class CsvParser {
         if (rowObject.publish_end == '0000-00-00 00:00:00') {
           rowObject.publish_end = null;
         }
+        if (rowObject.blog_category_id) {
+          const cats = this.settings.categories.filter(elem => {
+            if (elem.bc_id == Number(rowObject.blog_category_id)) {
+              return true;
+            }
+          });
+          rowObject.categories = cats.map(cat => cat.wp_id);
+        }
         if (rowObject.id != 'id') {
           const postQuery = this.constructPostQuery(rowObject);
           this.queries.push(postQuery);
@@ -131,13 +142,11 @@ class CsvParser {
 
 }
 
-var config = new Settings();
-
-var wp = new WPAPI({
-    endpoint: config.endpoint,
-    username: config.username,
-    password: config.password,
+let parser = new CsvParser();
+let wp = new WPAPI({
+    endpoint: parser.settings.endpoint,
+    username: parser.settings.username,
+    password: parser.settings.password,
 });
 
-let parser = new CsvParser();
 parser.parse();
