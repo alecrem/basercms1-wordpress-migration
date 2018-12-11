@@ -13,7 +13,6 @@ class ParsedCsvPostRow {
   content: string = null;
   detail: string = null;
   blog_category_id: string = null;
-  categories: number[] = [];
   user_id: string = null;
   status: string = null;
   posts_date: string = null;
@@ -23,6 +22,9 @@ class ParsedCsvPostRow {
   publish_end: string = null;
   created: string = null;
   modified: string = null;
+
+  wp_categories: number[] = [];
+  wp_status: string = null;
 
   constructor(values: Object) {
     Object.assign(this, values);
@@ -60,9 +62,9 @@ class CsvParser {
       title: row.name,
       slug: row.no,
       content: row.content,
-      categories: row.categories,
+      categories: row.wp_categories,
       date: date,
-      status: 'publish',
+      status: row.wp_status,
       comment_status: 'closed',
       ping_status: 'closed',
     });
@@ -114,7 +116,15 @@ class CsvParser {
               return true;
             }
           });
-          rowObject.categories = cats.map(cat => cat.wp_id);
+          rowObject.wp_categories = cats.map(cat => cat.wp_id);
+        }
+        if (
+          rowObject.status == '0' ||
+          (rowObject.publish_end != null && new Date(rowObject.publish_end) < new Date())
+        ) {
+          rowObject.wp_status = 'draft';
+        } else {
+          rowObject.wp_status = 'publish';
         }
         if (rowObject.id != 'id') {
           const postQuery = this.constructPostQuery(rowObject);
